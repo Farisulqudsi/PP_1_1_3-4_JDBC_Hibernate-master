@@ -11,13 +11,13 @@ import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
 
-    Connection connection;
+    private Connection connection;
 
     public UserDaoJDBCImpl() {
 
     }
 
-    public void createUsersTable() {
+    public void createUsersTable() throws SQLException {
 
         connection = Util.getConnection();
 
@@ -29,25 +29,31 @@ public class UserDaoJDBCImpl implements UserDao {
                       `lastname` VARCHAR(45) NOT NULL,
                       `age` INT NULL,
                       PRIMARY KEY (`id`));""");
+            connection.commit();
+            connection.close();
         } catch (SQLException e) {
             System.err.println("Произошла ошибка при создании таблицы");
             e.printStackTrace();
+            connection.rollback();
         }
     }
 
-    public void dropUsersTable() {
+    public void dropUsersTable() throws SQLException {
         connection = Util.getConnection();
 
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate("DROP TABLE IF EXISTS users");
+            connection.commit();
+            connection.close();
         } catch (SQLException e) {
             System.err.println("Не удалось удалить таблицу user");
             e.printStackTrace();
+            connection.rollback();
         }
 
     }
 
-    public void saveUser(String name, String lastName, byte age) {
+    public void saveUser(String name, String lastName, byte age) throws SQLException {
         connection = Util.getConnection();
 
         try (PreparedStatement pStatement = connection.prepareStatement(
@@ -58,14 +64,17 @@ public class UserDaoJDBCImpl implements UserDao {
             pStatement.setByte(3, age);
 
             pStatement.executeUpdate();
+            connection.commit();
+            connection.close();
 
         } catch (SQLException e) {
             System.err.println("При сохранении пользователя произошла ошибка");
             e.printStackTrace();
+            connection.rollback();
         }
     }
 
-    public void removeUserById(long id) {
+    public void removeUserById(long id) throws SQLException {
         connection = Util.getConnection();
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(
@@ -73,13 +82,16 @@ public class UserDaoJDBCImpl implements UserDao {
         )) {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
+            connection.commit();
+            connection.close();
         } catch (SQLException e) {
             System.err.println("При удалении пользователя произошла ошибка");
             e.printStackTrace();
+            connection.rollback();
         }
     }
 
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers() throws SQLException {
         connection = Util.getConnection();
 
         List <User> userList = new ArrayList<>();
@@ -96,23 +108,27 @@ public class UserDaoJDBCImpl implements UserDao {
                 user.setAge(resultSet.getByte("age"));
 
                 userList.add(user);
-            }
+            } connection.commit();
+            connection.close();
         } catch (SQLException e) {
             System.err.println("При получении списка пользователей произошла ошибка");
             e.printStackTrace();
+            connection.rollback();
         }
         return userList;
     }
 
-    public void cleanUsersTable() {
+    public void cleanUsersTable() throws SQLException {
         connection = Util.getConnection();
 
         try(Statement statement = connection.createStatement()) {
             statement.executeUpdate("DELETE FROM users");
+            connection.commit();
+            connection.close();
         } catch (SQLException e) {
             System.err.println("При очистке таблицы произошла ошибка");
             e.printStackTrace();
+            connection.rollback();
         }
-
     }
 }

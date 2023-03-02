@@ -12,6 +12,7 @@ public class Util {
         Connection connection = null;
 
         try {
+            connection.setAutoCommit(false);
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             System.out.println("Соединение с БД установлено");
         } catch (SQLException e) {
